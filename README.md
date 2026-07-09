@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# models.dev explorer
 
-## Getting Started
+Browse AI models, labs, providers, and multi-provider pricing from [models.dev](https://models.dev).
 
-First, run the development server:
+## Requirements
+
+- Node.js >= 20.9
+
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Next.js dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run sync` | Download latest `catalog.json`, `api.json`, labs index into `public/data/` |
 
-## Learn More
+## Data sources
 
-To learn more about Next.js, take a look at the following resources:
+- `https://models.dev/catalog.json` — canonical model metadata
+- `https://models.dev/api.json` — provider listings and pricing
+- `https://models.dev/labs` — lab descriptions (parsed from search index)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The app fetches these online (1h process-memory TTL). If live catalog fetch fails, it falls back to `public/data/catalog.json`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Pricing model
 
-## Deploy on Vercel
+The same canonical model can have different prices across providers. The app stores:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `costByProvider` — full provider → cost map
+- `costSummary.min/max` — per-field range
+- `costSummary.cheapest` — lowest input (then output) offer
+- `cost` — alias of cheapest (list convenience)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Routes
+
+- `/` — search, filter, sort models
+- `/models/[...id]` — model detail + provider price table
+- `/labs`, `/labs/[lab]`
+- `/providers`, `/providers/[id]`
